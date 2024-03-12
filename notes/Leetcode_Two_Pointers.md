@@ -205,4 +205,108 @@ Given s = "leetcode", return "leotcede".
           return ''.join(result)
   ```
   
+
+# 4.回文字符串
+
+680. Valid Palindrome II (Easy)
+
+[Leetcode](https://leetcode.com/problems/valid-palindrome-ii/description/) / [力扣](https://leetcode-cn.com/problems/valid-palindrome-ii/description/)
+
+```
+Input: "abca"
+Output: True
+Explanation: You could delete the character 'c'.
+```
+
+* **Question：判断字符串是否能构成回文字符串，如果本身不是，能否通过删除一个字符成为回文字符串，最终返回true or false**
+
+  所谓的回文字符串，是指具有左右对称特点的字符串，例如 "abcba" 就是一个回文字符串。
+
+* **Solution：**
+
+  > [!NOTE]
+  >
+  > 判断一个字符串是否是回文字符串的思路是
+  >
+  > <div align="center"> <img src="https://cs-notes-1256109796.cos.ap-guangzhou.myqcloud.com/fcc941ec-134b-4dcd-bc86-1702fd305300.gif" width="250px"> </div><br>
+  >
+  > 难点：本题的关键是处理删除一个字符。在使用双指针遍历字符串时，如果出现两个指针指向的字符不相等的情况，我们就试着删除一个字符，再判断删除完之后的字符串是否是回文字符串。
+  >
+  > 在判断删除后字符串是否为回文字符串时，我们不需要判断整个字符串，因为左指针左边和右指针右边的字符之前已经判断过具有对称性质，所以只需要判断中间的子字符串即可。
+
   
+
+* **Answer：**
+
+  `Java`
+
+```java
+class Solution {
+    public boolean validPalindrome(String s) {
+        int i = 0, j = s.length() - 1;
+      // 也可以是i<=j,但是当奇数个数的字符会多跑一次，例如abcba，所以当i=j时，就是奇数个字符串，无需判断
+        while(i < j){
+            if(s.charAt(i) != s.charAt(j)){
+              //任意一个为true则返回true
+                return isValid(s, i + 1, j) || isValid(s, i, j - 1);
+            }
+            i++;
+            j--;
+        }
+        return true;
+    }
+    //判断是不是回文字符串， 如果在循环中发现了不相等的字符，则会立即执行 `return false;`，表示不是回文字符串，结束方法的执行
+  	//如果整个循环结束时都没有发现不相等的字符，则会执行 `return true;`，表示是回文字符串
+    public boolean isValid(String s, int i, int j){
+        while(i < j){
+            if(s.charAt(i) != s.charAt(j)){
+                return false;
+            }
+            i++;
+            j--;
+        }
+        return true;
+    }
+}
+```
+
+`Java`和上面解题思路一致，只是代码更复杂
+
+```java
+class Solution {
+  //
+    public boolean validPalindrome(String s) {
+      for (int i = 0, j = s.length() - 1; i < j; i++, j--) {
+          if (s.charAt(i) != s.charAt(j)) {
+            //任意一个为true则返回true
+              return isPalindrome(s, i, j - 1) || isPalindrome(s, i + 1, j);
+          }
+      }
+      return true;
+    }
+  //判断是不是回文字符串， 如果整个循环结束时没有发现不相等的字符，则返回 true
+    private boolean isPalindrome(String s, int i, int j) {
+      while (i < j) {
+          if (s.charAt(i++) != s.charAt(j--)) {
+              return false;
+          }
+      }
+      return true;
+    }   
+}
+```
+
+# 5.归并两个有序数组
+
+88\. Merge Sorted Array (Easy)
+
+[Leetcode](https://leetcode.com/problems/merge-sorted-array/description/) / [力扣](https://leetcode-cn.com/problems/merge-sorted-array/description/)
+
+```html
+Input:
+nums1 = [1,2,3,0,0,0], m = 3
+nums2 = [2,5,6],       n = 3
+
+Output: [1,2,2,3,5,6]
+```
+
