@@ -13,7 +13,9 @@
 * **Java Core Fundamentals**
 
   [Java](./notes/Java30_index.md)
+
   [MySQL](./notes/MySQL.md)
+
   JDBC
 
 * **Hadoop Ecosystem Architecture**
