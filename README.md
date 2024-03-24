@@ -19,16 +19,17 @@
   JDBC
 
 * **Hadoop Ecosystem Architecture**
+  
   [Linux](./notes/Linux.md)
-
+  
   [Hadoop_Basic](./notes/Hadoop_Basic.md)
-
+  
   [Hadoop_HDFS](./notes/Hadoop_HDFS.md)
-
+  
   [Hadoop_MapReduce](./notes/Hadoop_MapReduce.md)
-
+  
   Maven
-
+  
   Shell编程
   Hadoop
   Zookeeper
@@ -36,7 +37,7 @@
   Hive
   Flume
   Kafka
-
+  
 * **Spark Ecosystem Architecture**
 
   Spark
