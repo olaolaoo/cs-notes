@@ -45,6 +45,15 @@ tac file1 从最后一行开始反向查看一个文件的内容
 cat -n file1 查看文件并显示行数
 ```
 
+# 配置环境变量
+
+```
+vim ~/.zshrc
+source ~/.zshrc
+```
+
+
+
 # 其他资料
 
 [常用命令全拼](https://www.runoob.com/w3cnote/linux-command-full-fight.html)

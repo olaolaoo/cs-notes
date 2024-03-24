@@ -13,15 +13,20 @@
 * **Java Core Fundamentals**
 
   [Java](./notes/Java30_index.md)
-  MySQL
+  [MySQL](./notes/MySQL.md)
   JDBC
 
 * **Hadoop Ecosystem Architecture**
+  [Linux](./notes/Linux.md)
 
-  > Hadoop生态体系架构
+  [Hadoop_Basic](./notes/Hadoop_Basic.md)
+
+  [Hadoop_HDFS](./notes/Hadoop_HDFS.md)
+
+  [Hadoop_MapReduce](./notes/Hadoop_MapReduce.md)
 
   Maven
-  Linux
+
   Shell编程
   Hadoop
   Zookeeper

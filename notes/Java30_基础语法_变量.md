@@ -970,5 +970,9 @@ public class Practice4 {
 
 _[课程视频](https://www.bilibili.com/video/BV1PY411e7J6?p=40&vd_source=6f12b8c78467086fc666a02ab409ef20)_
 
+> 赋值，遇到=，养成从右往左看的习惯
+>
+> Dog dog = (Dog)animal;将animal对象向下转为Dog类的对象
+
 
 
