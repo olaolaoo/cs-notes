@@ -4,11 +4,69 @@
 
 # 2.HDFS的Shell操作（开发重点）
 
-## 基本语法
+## 2.1.基本语法
 
-## XXX常用命令实操
+两个都行，结果一样：
 
-## 命令大全
+hadoop fs [具体命令]---我习惯写这种
+
+hdfs dfs [具体命令]
+
+## 2.2.常用命令实操
+
+### 查看命令帮助
+
+```bash
+# -help [命令]
+[ola@hadoop102 ~]$ hadoop fs -help rm
+-rm [-f] [-r|-R] [-skipTrash] [-safely] <src> ... :
+  Delete all files that match the specified file pattern. Equivalent to the Unix
+  command "rm <src>"
+
+  -f          If the file does not exist, do not display a diagnostic message or
+              modify the exit status to reflect an error.
+  -[rR]       Recursively deletes directories.
+  -skipTrash  option bypasses trash, if enabled, and immediately deletes <src>.
+  -safely     option requires safety confirmation, if enabled, requires
+              confirmation before deleting large directory with more than
+              <hadoop.shell.delete.limit.num.files> files. Delay is expected when
+              walking over large directory recursively to count the number of
+              files to be deleted before the confirmation.
+```
+
+### 创建文件夹
+
+```bash
+# -mkdir [路径]
+# 根目录下创建一个名字为shell的文件夹
+[ola@hadoop102 ~]$ hadoop fs -mkdir /shell
+```
+
+### 复制上传
+
+```bash
+# -put [上传路径] [目的地路径]；也可以用-copyFromLocal
+# 将diary文件复制到shell文件夹下
+[ola@hadoop102 ~]$ hadoop fs -put /home/ola/diary /shell
+```
+
+### 追加上传
+
+```bash
+# -appendToFile [追加文件路径] [目的地路径]
+# 将diaryCopy文件追加到shell文件夹下
+[ola@hadoop102 ~]$ hadoop fs -appendToFile /home/ola/diaryCopy /shell/diary 
+```
+
+### 剪切上传
+
+```bash
+# -moveFromLocal [上传路径] [目的地路径]
+# 将diary文件复制到shell文件夹下
+[ola@hadoop102 ~]$ hadoop fs -moveFromLocal /home/ola/diaryCopy /shell
+```
+
+## 2.3.命令大全
 
 通过下面的命令查询所有命令
 
