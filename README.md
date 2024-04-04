@@ -28,14 +28,18 @@
   
   [Hadoop_MapReduce](./notes/Hadoop_MapReduce.md)
   
+  Hadoop_Yarn
+  
   Maven
   
-  Shell编程
-  Hadoop
   Zookeeper
+  
   HA+新特性
-  Hive
+  
+  [Hive](./notes/Hive.md)
+  
   Flume
+  
   Kafka
   
 * **Spark Ecosystem Architecture**

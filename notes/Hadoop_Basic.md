@@ -1223,23 +1223,27 @@ drwxr-xr-x. 4 ola ola     31 9月  12 2019 share
    * 配置日志
    * 配置workers
 
-   =============== hadoop102 ===============
-   17232 JobHistoryServer
-   17300 Jps
-   16790 DataNode
-   17065 NodeManager
-   16636 NameNode
-   =============== hadoop103 ===============
-   15875 Jps
-   15223 DataNode
-   15401 ResourceManager
-   15530 NodeManager
-   =============== hadoop104 ===============
-   14182 Jps
-   13978 SecondaryNameNode
-   13868 DataNode
-   14061 NodeManager
-
+   
+   
+   我的集群目前配置方案：
+   
+   * hadoop102
+     17232 JobHistoryServer
+     17300 Jps
+     16790 DataNode
+     17065 NodeManager
+     16636 NameNode
+   * hadoop103 
+     15875 Jps
+     15223 DataNode
+     15401 ResourceManager
+     15530 NodeManager
+   * hadoop104
+      14182 Jps
+      13978 SecondaryNameNode
+      13868 DataNode
+      14061 NodeManager
+    
 4. **集群启动/停止**
 
    * 模块逐一启动/停止

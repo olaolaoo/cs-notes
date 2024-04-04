@@ -440,7 +440,7 @@ shuffle分区决定reducer的数量以及输出文件个数
 
 ### 2.1.2.Job提交流程源码
 
-提交3样东西？？job.xml。jar包。切片信息。提交给yarn
+提交3样东西job.xml，jar包，切片信息，提交给yarn
 
 可以按照下面的流程在idea中debug本文档[1.5.本地运行案例Driver阶段 ](###Driver阶段 )的代码
 
@@ -492,7 +492,7 @@ status = submitClient.submitJob(jobId, submitJobDir.toString(),job.getCredential
 
 #### FileInputFormat切片源码解析
 
-`FileInputFormat`是一个抽象类，为MapReduce作业读取文件输入定义了基本的工作流程。它负责处理文件的输入路径，并将文件切分成一个个小的数据片段（splits），每个数据片段被一个独立的Mapper处理。
+`FileInputFormat`是一个抽象类，继承了InputFormat类，为MapReduce作业读取文件输入定义了基本的工作流程。它负责处理文件的输入路径，并将文件切分成一个个小的数据片段（splits），每个数据片段被一个独立的Mapper处理。
 
 * **可以按照下面的流程在idea中debug本文档[1.5.本地运行案例Driver阶段 ](###Driver阶段 )的代码**。
 
@@ -524,16 +524,44 @@ public abstract class FileInputFormat<K, V> extends InputFormat<K, V>
 
 #### TextInputFormat切片(用的多，按行读)
 
+`TextInputFormat`是处理文本数据最常用的输入格式，也是默认输入格式。适用于日志文件、纯文本数据等。
 `TextInputFormat`是`FileInputFormat`的一个具体实现，主要用于读取纯文本文件。它按行处理文本文件，将文件的每一行作为一个记录：
 
-- **键（Key）**：记录的偏移量（每行的开始位置在文件中的字节偏移量）。
-- **值（Value）**：行的内容（不包含行尾符）。
-
-`TextInputFormat`是处理文本数据最常用的输入格式，适用于日志文件、纯文本数据等。
+- **键（Key）**：记录的偏移量（每行的开始位置在文件中的字节偏移量）
+- **值（Value）**：行的内容（不包含行尾符）
 
 #### CombineTextInputFormat切片(用的多，按文件)
 
-`CombineTextInputFormat`是为了优化处理小文件而设计的。在使用`TextInputFormat`时，如果输入路径中有大量的小文件，每个文件都会被分配给一个单独的Mapper处理，这可能会导致大量的Map任务，从而增加调度和处理的开销。`CombineTextInputFormat`通过合并这些小文件的输入切片来减少Map任务的数量：
+> 注意：虚拟存储切片最大值设置最好根据实际的小文件大小情况来设置具体的值。
+> 生成切片过程包括：虚拟存储过程和切片过程二部分
+
+`CombineTextInputFormat`是为了优化处理小文件而设计的。在使用`TextInputFormat`时，如果输入路径中有大量的小文件，每个文件都会被分配给一个单独的Mapper处理，这可能会导致大量的Map任务，从而增加调度和处理的开销。`CombineTextInputFormat`通过合并这些小文件的输入切片来减少Map任务的数量
+
+```java
+// 如果不设置InputFormat，它默认用的是TextInputFormat.class
+job.setInputFormatClass(CombineTextInputFormat.class);
+
+//虚拟存储切片最大值设置4m
+ CombineTextInputFormat.setMaxInputSplitSize(job, 4194304);
+```
+
+![](./images/hp_mr15.png)
+
+（1）虚拟存储过程： 将输入目录下所有文件大小，依次和设置的 setMaxInputSplitSize 值比较，如果不 大于设置的最大值，逻辑上划分一个块。如果输入文件大于设置的最大值且大于两倍， 那么以最大值切割一块；当剩余数据大小超过设置的最大值且不大于最大值 2 倍，此时 将文件均分成 2 个虚拟存储块（防止出现太小切片）。
+
+例如 setMaxInputSplitSize 值为 4M，输入文件大小为 8.02M，则先逻辑上分成一个 4M。剩余的大小为 4.02M，如果按照 4M 逻辑划分，就会出现 0.02M 的小的虚拟存储 文件，所以将剩余的 4.02M 文件切分成（2.01M 和 2.01M）两个文件。 （2）切片过程：
+
+（a）判断虚拟存储的文件大小是否大于 setMaxInputSplitSize 值，大于等于则单独 形成一个切片。
+
+（b）如果不大于则跟下一个虚拟存储文件进行合并，共同形成一个切片。
+
+（c）测试举例：有 4 个小文件大小分别为 1.7M、5.1M、3.4M 以及 6.8M 这四个小 文件，则虚拟存储之后形成 6 个文件块，大小分别为：
+
+​	1.7M，（2.55M、2.55M），3.4M 以及（3.4M、3.4M）
+
+​	最终会形成 3 个切片，大小分别为：
+
+​	（1.7+2.55）M，（2.55+3.4）M，（3.4+3.4）M
 
 #### CombineTextInputFormat切片案例实操
 
@@ -555,7 +583,7 @@ reduce task主动从map task中拉取分区数据
 
 ## 2.3.Map阶段后Reduce阶段前（Shuffle机制）
 
-### shuffle机制（面试）
+### 2.3.1.shuffle机制（面试）
 
 ![](./images/hp_mr11.png)
 
@@ -572,11 +600,11 @@ map阶段结束后，数据先分区，再进入maptask上的outPutCollector----
 
 最后reduce task来主动拉取指定分区的数据，一个reduce task拉取一个分区
 
-### Partition 分区（面试）
+### 2.3.2.Partition 分区（面试）
 
 #### 概述
 
-* 分区数量决定了ReduceTask的数量
+* 分区数量和ReduceTask的数量相互影响产出文件个数
 
 - 发生在Map阶段之后，Shuffle阶段期间，目的是为了数据的分发
 - 决定了Map阶段输出的键值对如何分配给Reducer，每个分区对应一个Reducer
@@ -586,19 +614,27 @@ map阶段结束后，数据先分区，再进入maptask上的outPutCollector----
 
 * 是的，分区直接影响输出文件的个数。在MapReduce作业中，每个reduce task的输出都会被写入一个独立的输出文件。因此，reduce task的数量（也就是分区的数量）决定了输出文件的总数。例如，如果一个MapReduce作业配置了10个reduce task，那么理论上会产生10个输出文件，前提是所有reduce task都有数据处理。
 
+#### 分区总结
 
+（1）如果ReduceTask的数量> getPartition的结果数，则会多产生几个空的输出文件part-r-000xx； 
 
-4、分区总结
+（2）如果1<ReduceTask的数量<getPartition的结果数，则有一部分分区数据无处安放，会Exception； 
 
-（1）如果ReduceTask的数量> getPartition的结果数，则会多产生几个空的输出文件part-r-000xx； （2）如果1<ReduceTask的数量<getPartition的结果数，则有一部分分区数据无处安放，会Exception； （3）如果ReduceTask的数量=1， 则不管MapTask端输出多少个分区文件， 最终结果都交给这一个 ReduceTask，最终也就只会产生一个结果文件 part-r-00000； （4）分区号必须从零开始，逐一累加。
+（3）如果ReduceTask的数量=1， 则不管MapTask端输出多少个分区文件， 最终结果都交给这一个 ReduceTask，最终也就只会产生一个结果文件 part-r-00000； 
 
-5、案例分析 例如：假设自定义分区数为5，则 
+（4）分区号必须从零开始，逐一累加。
+
+#### 案例分析
+
+假设自定义分区数为5
 
 （1）job.setNumReduceTasks(1); 会正常运行，生成一个输出文件，包含所有数据
 
 （2）job.setNumReduceTasks(2); 会报错
 
 （3）job.setNumReduceTasks(6);大于5，程序会正常运行，会产生空文件
+
+（4）job.setNumReduceTasks(5);等于5，程序会正常运行，会按照分区产生5个文件
 
 #### 默认分区
 
@@ -626,13 +662,13 @@ return partition; }
 }
 ```
 
-Step2:在Job驱动中，设置自定义Partitioner
+* Step2:在Job驱动中，设置自定义Partitioner
 
 ```java
 job.setPartitionerClass(CustomPartitioner.class);
 ```
 
-Step3:自定义Partition后，要根据自定义Partitioner的逻辑设置相应数量的ReduceTask
+* Step3:自定义Partition后，要根据自定义Partitioner的逻辑设置相应数量的ReduceTask
 
 ```java
 job.setNumReduceTasks(5);
