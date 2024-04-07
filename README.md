@@ -28,7 +28,7 @@
   
   [Hadoop_MapReduce](./notes/Hadoop_MapReduce.md)
   
-  Hadoop_Yarn
+  [Hadoop_Yarn](./notes/Hadoop_Yarn.md)
   
   Maven
   
@@ -38,13 +38,20 @@
   
   [Hive](./notes/Hive.md)
   
-  Flume
+  [Flume](./notes/Flume.md)
   
   Kafka
   
 * **Spark Ecosystem Architecture**
 
-  Spark
+  [Scala](./notes/Scala.md)
+
+  [Spark-Core](./notes/Spark_Core.md)
+
+  [Spark_Sql](./notes/Spark_Sql.md)
+
+  Spark_Streaming
+
   Presto
   Superset
   DolphinScheduler
