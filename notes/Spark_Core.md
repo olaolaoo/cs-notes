@@ -456,11 +456,11 @@ bin/spark-submit \
 
 ### 查看资源和历史任务
 
-http://hadoop103:8080， 查看hadoop资源情况，现在是使用yarn资源，所以不能在sparkhttp://hadoop102:8080查看资源了
+http://hadoop103:8088， 查看hadoop资源情况，现在是使用yarn资源，所以不能在sparkhttp://hadoop102:8080查看资源了
 
 http://hadoop102:18080，查看历史任务，可以从hadoop资源情况跳转
 
-## K8S & Mesos 模式
+## xK8S & Mesos 模式
 
 Mesos 是 Apache 下的开源分布式资源管理框架，它被称为是分布式系统的内核,在Twitter 得到广泛使用,管理着 Twitter 超过 30,0000 台服务器上的应用部署。
 
@@ -572,7 +572,7 @@ Spark Executor 是集群中运行在工作节点（Worker）中的一个 JVM 进
 
 这里所谓的有向无环图，并不是真正意义的图形，而是由 Spark 程序直接映射成的数据流的高级抽象模型。简单理解就是将整个程序计算的执行过程用图形表示出来,这样更直观，更便于理解，可以用于表示程序的拓扑结构。DAG（Directed Acyclic Graph）有向无环图是由点和线组成的拓扑图形，该图形具有方向，不会闭环。
 
-## 提交流程
+## 提交流程-Driver的运行模式
 
 所谓的提交流程，其实就是我们开发人员根据需求写的应用程序通过 Spark 客户端提交给 Spark 运行环境执行计算的流程。
 
@@ -758,7 +758,7 @@ RDD 是 Spark 框架中用于数据处理的核心模型，接下来我们看看
 * Step3: Spark 框架根据需求将计算逻辑根据分区划分成不同的任务
 * Step4: 调度节点将任务根据计算节点状态发送到对应的计算节点进行计算
 
-从以上流程可以看出 RDD 在整个流程中主要用于将逻辑进行封装，并生成 Task 发送给Executor 节点执行计算，接下来我们就一起看看 Spark 框架中 RDD 是具体是如何进行数据处理的。
+从以上流程可以看出 RDD 在整个流程中主要用于将计算逻辑进行封装，并生成 Task 发送给Executor 节点执行计算，接下来我们就一起看看 Spark 框架中 RDD 是具体是如何进行数据处理的。
 
 ### 5.1.4 基础编程-RDD 数据处理
 
@@ -791,7 +791,7 @@ val rdd2 = sc.wholeTextFiles("datas")
 
 #### RDD 并行度与分区
 
-默认情况下，Spark 可以将一个作业切分多个任务后，发送给 Executor 节点并行计算，而能 够并行计算的任务数量我们称之为并行度。这个数量可以在构建 RDD 时指定。记住，这里的并行执行的任务数量，并不是指的切分任务的数量，不要混淆了。
+默认情况下，Spark 可以将一个作业切分多个任务后，发送给 Executor 节点并行计算，而能够并行计算的任务数量我们称之为并行度。这个数量可以在构建 RDD 时指定。记住，这里的并行执行的任务数量，并不是指的切分任务的数量，不要混淆了。
 
 * 读取内存数据时，数据可以按照并行度的设定进行数据的分区操作
 
@@ -825,7 +825,7 @@ def positions(length: Long, numSlices: Int): Iterator[(Int, Int)] = {
 }
 ```
 
-* 读取文件数据时，数据是按照 Hadoop 文件读取的规则进行切片，而切片规则和数据读取的规则有些差异，具体 Spark 核心源码如下。1.1倍！！！
+* 读取文件数据时，分区是按照 Hadoop 文件读取的规则进行切片，而切片规则和数据读取的规则有些差异，具体 Spark 核心源码如下。1.1倍！！！
 
 ```java
  public InputSplit[] getSplits(JobConf job, int numSplits)throws IOException {
@@ -1746,7 +1746,7 @@ val conf: SparkConf = new SparkConf()
 
 #### RDD依赖关系
 
-1. RDD 血缘关系
+##### RDD 血缘关系
 
 相邻两个RDD之间关系称为依赖关系：新的RDD用到了旧的RDD，所以就依赖于旧的RDD。不相邻的RDD关系称为血缘关系，每个RDD会保存血缘关系。
 
@@ -1760,7 +1760,7 @@ val conf: SparkConf = new SparkConf()
 
 RDD 只支持粗粒度转换，即在大量记录上执行的单个操作。将创建 RDD 的一系列 Lineage（血统）记录下来，以便恢复丢失的分区。RDD 的 Lineage 会记录 RDD 的元数据信息和转换行为，当该 RDD 的部分分区数据丢失时，它可以根据这些信息来重新运算和恢复丢失的数据分区。
 
-2. RDD 依赖关系
+##### RDD 依赖关系
 
 这里所谓的依赖关系，其实就是两个相邻 RDD 之间的关系。
 
@@ -1768,7 +1768,7 @@ RDD 只支持粗粒度转换，即在大量记录上执行的单个操作。将�
 | --------------------------------------------------------- | ------------------------------------------------------ |
 | ![](./images/spark_22.png)                                | ![](./images/spark_23.png)                             |
 
-3.   RDD 窄依赖
+##### RDD 窄依赖
 
 窄依赖表示每一个父(上游)RDD 的 Partition 最多被子（下游）RDD 的一个 Partition 使用，窄依赖我们形象的比喻为独生子女。
 
@@ -1776,7 +1776,7 @@ RDD 只支持粗粒度转换，即在大量记录上执行的单个操作。将�
 class OneToOneDependency[T](rdd: RDD[T]) extends NarrowDependency[T](rdd)
 ```
 
-4. RDD 宽依赖
+##### RDD 宽依赖
 
 宽依赖表示同一个父（上游）RDD 的 Partition 被多个子（下游）RDD 的 Partition 依赖，会引起 Shuffle
 
@@ -1793,7 +1793,7 @@ class ShuffleDependency[K: ClassTag, V: ClassTag, C: ClassTag](
  extends Dependency[Product2[K, V]]
 ```
 
-5. RDD 阶段划分
+##### RDD 阶段划分
 
 | 窄依赖<br />无shuffle，不分阶段 | 宽依赖<br />有shuffle，分阶段 |
 | ------------------------------- | ----------------------------- |
@@ -1805,7 +1805,7 @@ class ShuffleDependency[K: ClassTag, V: ClassTag, C: ClassTag](
 
 DAG（Directed Acyclic Graph）有向无环图是由点和线组成的拓扑图形，该图形具有方向，不会闭环。例如，DAG 记录了 RDD 的转换过程和任务的阶段。
 
-6. RDD 阶段划分源码
+##### RDD 阶段划分源码
 
 [RDD 阶段划分源码讲解](https://www.bilibili.com/video/BV11A411L7CK/?p=96&spm_id_from=pageDriver&vd_source=6f12b8c78467086fc666a02ab409ef20)
 
@@ -1868,7 +1868,7 @@ parents
 }
 ```
 
-7. RDD 任务划分
+##### RDD 任务划分
 
 RDD 任务切分中间分为：Application、Job、Stage 和 Task
 
@@ -1882,7 +1882,7 @@ RDD 任务切分中间分为：Application、Job、Stage 和 Task
 
 注意：Application->Job->Stage->Task 每一层都是 1 对 n 的关系。
 
-8. RDD 任务划分源码
+##### RDD 任务划分源码
 
 ......
 

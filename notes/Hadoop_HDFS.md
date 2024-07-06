@@ -217,7 +217,7 @@ hdfs dfs [具体命令]
 
 > 客户端读数据时，遵循两个原则，一个是节点最近，一个是负载均衡。负载均衡的目的是防止节点最近读取，都放在某一个datanode上读取，造成这个datanode负载过重
 
-![](./images/hp_ds.png)
+![](./images/hp_ds1.png)
 
 （1）客户端通过DistributedFileSystem向NameNode请求下载文件，NameNode通过查询元数据，找到文件块所在的DataNode地址
 
@@ -230,10 +230,8 @@ hdfs dfs [具体命令]
 # 5.NameNode和SecondaryNameNode（了解）
 
 * 为了平衡计算快和数据的可靠性，采取了数据内存一份，硬盘也一份。所以就有了NameNode存储的数据有三部分
-  * 内存 = Edits_Inprogress编辑日志，只记录数据操作 + FsImage镜像文件，数据最终值
-  * 后两者存在硬盘中
+  * 内存 = Edits_Inprogress编辑日志 + FsImage镜像文件。数据最终值
   * FsImage镜像文件是怎么来的呢？先将NameNode中Edits_Inprogress变成edit，同时生成一个新的Edits_Inprogress给数据操作用，生成的edit和现有的FsImage进行合并，生成新的FsImage，替换掉NameNode中的FsImage
-
 * 如果长时间添加数据到Edits中，会导致该文件数据过大，效率降低，而且一旦断电，恢复元数据需要的时间过长。因此出现了2NN负责定期合并后两者
 
 102上NameNode数据存储路径：
@@ -251,8 +249,6 @@ inprogress是namenode比2nn多的一个文件，所以当NameNode出bug挂了，
 FsImage镜像文件--存储了目录树
 
 Edits_Inprogress 存储了操作记录
-
-
 
 # 6.DataNode（理解 ）
 

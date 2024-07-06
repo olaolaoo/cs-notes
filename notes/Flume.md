@@ -286,6 +286,53 @@ Position File 的格式如下：
 
 Taildir Source下默认通过file绝对路径和inode来判断一个文件是否是新文件，这就会出现一个新的问题，如果文件夹内监控的文件是会更新名称的，则会导致文件重复上传，比如监控的是hive.log，但是第二天会更改会hive20240401.log，那么会重复上传数据。有两种解决方案，第一是让后端生成log文件时，将名称按照hive+日期的形式。第二种是改源码，将判断是否是新文件判断标准改成只通过inode来识别，即使文件改了名称，也还是一个文件。
 
+```bash
+a3.sources = r3
+a3.sinks = k3
+a3.channels = c3
+# Describe/configure the source
+a3.sources.r3.type = TAILDIR
+a3.sources.r3.positionFile = /opt/module/flume/tail_dir.json
+a3.sources.r3.filegroups = f1 f2
+a3.sources.r3.filegroups.f1 = /opt/module/flume/files/.*file.*
+a3.sources.r3.filegroups.f2 = /opt/module/flume/files2/.*log.*
+
+# Describe the sink
+a3.sinks.k3.type = hdfs
+a3.sinks.k3.hdfs.path = 
+hdfs://hadoop102:9820/flume/upload2/%Y%m%d/%H
+#上传文件的前缀
+a3.sinks.k3.hdfs.filePrefix = upload-
+#是否按照时间滚动文件夹
+a3.sinks.k3.hdfs.round = true
+#多少时间单位创建一个新的文件夹
+a3.sinks.k3.hdfs.roundValue = 1
+#重新定义时间单位
+a3.sinks.k3.hdfs.roundUnit = hour
+#是否使用本地时间戳
+a3.sinks.k3.hdfs.useLocalTimeStamp = true
+#积攒多少个 Event 才 flush 到 HDFS 一次
+a3.sinks.k3.hdfs.batchSize = 100
+#设置文件类型，可支持压缩
+a3.sinks.k3.hdfs.fileType = DataStream
+#多久生成一个新的文件
+a3.sinks.k3.hdfs.rollInterval = 60
+#设置每个文件的滚动大小大概是 128M
+a3.sinks.k3.hdfs.rollSize = 134217700
+#文件的滚动与 Event 数量无关
+a3.sinks.k3.hdfs.rollCount = 0
+
+# Use a channel which buffers events in memory
+a3.channels.c3.type = memory
+a3.channels.c3.capacity = 1000
+a3.channels.c3.transactionCapacity = 100
+# Bind the source and sink to the channel
+a3.sources.r3.channels = c3
+a3.sinks.k3.channel = c3
+```
+
+![](./images/flume_7.png)
+
 # Flume进阶
 
 # 问题

@@ -4,6 +4,8 @@
 
 # 1.Hadoop 运行环境搭建
 
+hadoop版本hadoop-3.1.3！！
+
 ## 1.1Hadoop 运行环境搭建模版虚拟机环境准备
 
 ### ip设定、hostname更改、host映射添加
@@ -1243,7 +1245,7 @@ drwxr-xr-x. 4 ola ola     31 9月  12 2019 share
       13978 SecondaryNameNode
       13868 DataNode
       14061 NodeManager
-    
+   
 4. **集群启动/停止**
 
    * 模块逐一启动/停止
